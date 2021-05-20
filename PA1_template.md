@@ -8,7 +8,8 @@ output:
 &nbsp;  
 
 #### Global settings
-```{r}
+
+```r
 library(knitr)
 opts_chunk$set(echo=TRUE, cache=TRUE)
 ```
@@ -16,7 +17,8 @@ opts_chunk$set(echo=TRUE, cache=TRUE)
 &nbsp;  
 
 ## Loading and preprocessing the data
-```{r}
+
+```r
 activityData <- read.csv(unzip('activity.zip'))
 activityData$date <- as.Date(activityData$date, "%Y-%m-%d")
 ```
@@ -24,17 +26,19 @@ activityData$date <- as.Date(activityData$date, "%Y-%m-%d")
 &nbsp;  
 
 ## What is mean total number of steps taken per day?
-```{r}
+
+```r
 stepsPerDay <- aggregate(steps~date, data=activityData, FUN=sum)
 meanSPD <- mean(stepsPerDay$steps, na.rm=TRUE)
 medianSPD <- median(stepsPerDay$steps, na.rm=TRUE)
 ```
-*Average(mean) steps taken per day*: **`r format(meanSPD, 7)`**  
-*Median of steps taken per *: **`r format(medianSPD, 7)`**  
+*Average(mean) steps taken per day*: **10766.19**  
+*Median of steps taken per *: **10765**  
 &nbsp;  
 
 #### Let's plot a histogram showing distribution of steps taken per day.
-```{r fig.width=5.5, fig.height=4, fig.align="left"}
+
+```r
 with(stepsPerDay, {
         hist(steps, main="Distribution of total number of steps taken each day", 
              ylab="Count", xlab="Total steps per each day", col="#F5C710")
@@ -44,11 +48,14 @@ with(stepsPerDay, {
 )
 ```
 
+<img src="PA1_template_files/figure-html/unnamed-chunk-4-1.png" style="display: block; margin: auto auto auto 0;" />
+
 &nbsp;  
 &nbsp;  
 
 ## What is the average daily activity pattern?
-```{r fig.width=6, fig.height=4}
+
+```r
 stepsPerInterval <- aggregate(steps~interval, data=activityData, FUN=mean, na.rm=TRUE)
 maxActiveI <- stepsPerInterval[which.max(stepsPerInterval$steps), "interval"]
 maxActiveT <- paste(as.character(as.integer(maxActiveI/60)), as.character(maxActiveI%%60), sep=":")
@@ -62,15 +69,18 @@ with(stepsPerInterval, {
 )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
 #### The 5-minute interval with maximum steps:
-The 5-minute interval that, on an average, contains the maximum number of steps is **interval #`r maxActiveI`**  
-Which is the 5 minutes leading to **`r maxActiveT`**.
+The 5-minute interval that, on an average, contains the maximum number of steps is **interval #835**  
+Which is the 5 minutes leading to **13:55**.
 
 &nbsp;  
 &nbsp;  
 
 ## Imputing missing values
-```{r results="asis"}
+
+```r
 incompleteRows <- activityData[!complete.cases(activityData),]
 missingValues <- dim(incompleteRows)[1]
 # Let us fill the missing values, with the averages for that specific time interval across all days, rounded to the nearest integer. We are rounding to the nearest integer because steps cannot be floats.
@@ -94,15 +104,42 @@ kable(df, format="html", align=c("c", "c", "c"),
       table.attr = "style='width:500px;border:1px solid;border-width: 1px 0;'"
       )
 ```
+
+<table style='width:500px;border:1px solid;border-width: 1px 0;'>
+<caption>Comparison of the original and the missing values inputted data sets</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;">   </th>
+   <th style="text-align:center;"> missing values </th>
+   <th style="text-align:center;"> Mean spd* </th>
+   <th style="text-align:center;"> Median spd* </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Origianal data </td>
+   <td style="text-align:center;"> 2304 </td>
+   <td style="text-align:center;"> 10766.19 </td>
+   <td style="text-align:center;"> 10762 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Modified data </td>
+   <td style="text-align:center;"> 0 </td>
+   <td style="text-align:center;"> 10765.64 </td>
+   <td style="text-align:center;"> 10765 </td>
+  </tr>
+</tbody>
+</table>
 \* spd = steps per day  
 
-Based on the data shown in the table above, **the original data set had `r missingValues` missing values**. It appears **inputting missing values does not make a remarkable change** in the average steps per day.
+Based on the data shown in the table above, **the original data set had 2304 missing values**. It appears **inputting missing values does not make a remarkable change** in the average steps per day.
 &nbsp;  
 &nbsp;  
 
 
 #### Here is a histogram of average steps taken each day using the modified data
-```{r fig.width=6, fig.height=4.5}
+
+```r
 # plot the new data
 with(newStepsPerDay, {
         hist(steps, main="Distribution of total number of steps taken each day,\nnew data set", 
@@ -113,11 +150,14 @@ with(newStepsPerDay, {
 )
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
 &nbsp;  
 &nbsp;  
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r fig.width=6, fig.height=6}
+
+```r
 weekenddays <- c("Saturday", "Sunday")
 newActivityData$weekend <- as.integer(weekdays(newActivityData$date) %in% weekenddays)
 avs <- aggregate(newActivityData$steps, by=list(newActivityData$weekend, newActivityData$interval), FUN=mean)
@@ -140,6 +180,8 @@ ggplot(data=avs, aes(x=interval, y=avsteps), type="l") +
     strip.background = element_rect(fill="wheat")
   )
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
 Based on the above plot, there appear to be notable differences between the activity patterns 
 of weekdays and weekends. Over the weekends, the activity is more evenly distributed throughout the waking part of the day. On the other hand, weekday activity seems to 
